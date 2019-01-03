@@ -2,15 +2,15 @@ import { message} from 'antd';
 
 import appConfig from '../appConfig';
 import axios from 'axios';
+import jsUtil from "../util/JsUtil";
 let apiRootPath = appConfig.apiRootPath;
 
 class Api {
-    static api = new Api();
     apiRootPath = appConfig.apiRootPath;
     constructor() {
         console.log('运行环境：', process.env.NODE_ENV, appConfig);
     }
-     postWithAuth(uri, params) {
+    postWithAuth(uri, params) {
         let url = apiRootPath + uri;
          let fd = new FormData();
          fd.append("json",JSON.stringify(params));
@@ -21,7 +21,6 @@ class Api {
                 }
             }).then(res => {
                 resolve(res.data);
-                console.log(res);
                 console.log(res.data);
             }).catch(err => {
                 reject(err.data);
@@ -44,6 +43,25 @@ class Api {
                 console.log(err);
             });
         });
+    }
+
+    /**
+     * 判断是否登陆
+     */
+     isLoginState(){
+        let userId = localStorage.getItem("userId");
+        let loginTime = localStorage.getItem("loginTime");
+        if (jsUtil.isEmpty(userId) || jsUtil.isEmpty(loginTime)) {
+            return false;
+        }
+        let expirationTime = 9000000;
+        let nweTime = new Date().getTime();
+        if(nweTime - Number(loginTime) > expirationTime){
+            console.log("登陆过程");
+            localStorage.clear();
+            return false;
+        }
+        return true;
     }
 }
 
