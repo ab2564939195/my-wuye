@@ -1,7 +1,7 @@
 import React from 'react';
 import CecondLevelMenu from "../../util/CecondLevelMenu";
 import Api from "../../data/API.js";
-import { Table, Divider, Tag } from 'antd';
+import { Table, Divider } from 'antd';
 import {message} from "antd/lib/index";
 export default class EmployeeList extends React.Component {
     constructor(prop) {
@@ -78,9 +78,9 @@ export default class EmployeeList extends React.Component {
         key: 'action',
         render: (text, record) => (
             <span>
-      <a href="#">修改</a>
+      <a >修改</a>
       <Divider type="vertical" />
-      <a href="#">离职</a>
+      <a >离职</a>
     </span>
         ),
     }];

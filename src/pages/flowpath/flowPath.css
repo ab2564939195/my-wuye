@@ -1,0 +1,35 @@
+.add-head{
+    height: 90px;
+    background-color: #333744;
+}
+.add-margin-right{
+    margin-right: 10px;
+}
+.add-body{
+    margin: 15px;
+}
+.add-font-bold{
+    font-size: 20px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+.add-text-align{
+    text-align: center;
+}
+.add-text-right{
+    text-align: right;
+}
+.colHeight{
+    height: 10px;
+}
+.componentSelectDiv{
+    width: 900px;
+    height: 70px;
+    border: 2px green solid;
+    margin:  auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top:0;
+    bottom: 0;
+}

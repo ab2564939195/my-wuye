@@ -44,6 +44,21 @@ class Api {
             });
         });
     }
+    deleteWithAuth(uri) {
+        let url = apiRootPath + uri;
+        console.log(url);
+        return new Promise((resolve, reject) => {
+            axios.delete(url).then(res => {
+                resolve(res.data);
+                console.log(res);
+                console.log(res.data);
+            }).catch(err => {
+                reject(err.data);
+                message.error('网络请求异常',0.5);
+                console.log(err);
+            });
+        });
+    }
 
     /**
      * 判断是否登陆

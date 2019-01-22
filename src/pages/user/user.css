@@ -4,3 +4,17 @@
 .a{
     border: 1px solid red;
 }
+.marginRight{
+    margin-right: 5px;
+}
+.marginBottom{
+    margin-bottom: 5px;
+}
+.textAlignR{
+    text-align: right;
+}
+.addBtn{
+    border: none;
+    background-color: #FDFDFE;
+
+}
