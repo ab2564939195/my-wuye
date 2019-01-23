@@ -22,10 +22,10 @@ export default class ComponentSelect extends React.Component {
                         <Button onClick={this.props.componentBtnClick.bind(this,'text')}>上传文件</Button>
                     </Col>
                     <Col>
-                        <Button onClick={this.props.componentBtnClick.bind(this,'text')}>日期时间</Button>
+                        <Button onClick={this.props.componentBtnClick.bind(this,'dateTime')}>日期时间</Button>
                     </Col>
                     <Col>
-                        <Button onClick={this.props.componentBtnClick.bind(this,'text')}>日期</Button>
+                        <Button onClick={this.props.componentBtnClick.bind(this,'date')}>日期</Button>
                     </Col>
                     <Col>
                         <Button onClick={this.props.componentBtnClick.bind(this,'text')}>手机号码</Button>
@@ -38,10 +38,10 @@ export default class ComponentSelect extends React.Component {
                         <Button onClick={this.props.componentBtnClick.bind(this,'text')}>多行文本</Button>
                     </Col>
                     <Col>
-                        <Button>多选按钮</Button>
+                        <Button onClick={this.props.componentBtnClick.bind(this,'checkbox')}>多选按钮</Button>
                     </Col>
                     <Col>
-                        <Button>单选按钮</Button>
+                        <Button onClick={this.props.componentBtnClick.bind(this,'radio')}>单选按钮</Button>
                     </Col>
                     <Col>
                         <Button onClick={this.props.componentClose}>关闭</Button>

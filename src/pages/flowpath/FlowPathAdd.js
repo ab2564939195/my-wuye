@@ -1,7 +1,9 @@
 import React from 'react';
-import {Button, Icon, Row, Col, Modal, Input, Switch, message, Checkbox} from 'antd';
+import {Button, Icon, Row, Col, Modal, Input, Switch, message, Checkbox, DatePicker} from 'antd';
 import './flowPath.css';
 import ComponentSelect from "./ComponentSelect";
+import moment from 'moment';
+import jsUtil from "../../util/JsUtil";
 
 export default class FlowPathAdd extends React.Component {
 
@@ -72,6 +74,8 @@ export default class FlowPathAdd extends React.Component {
             serveInput: data
         });
     };
+
+    //点击设置
     addSetting = () => {
         this.setState({
             visibleSetting: true,
@@ -102,7 +106,7 @@ export default class FlowPathAdd extends React.Component {
         console.log(...this.state.jieguoArray);
     }
 
-
+    //点击添加组件
     addZj = (index, e) => {
         console.log(index);
         this.setState({
@@ -113,26 +117,34 @@ export default class FlowPathAdd extends React.Component {
         })
 
     }
-
+    //关闭组件
     componentClose = () => {
         this.setState({
             addButZhuJian: false,
-            zhujianHid: 'true'
+            zhujianHid: 'true',
+            isUpdate: false
         })
+
     }
+    //点击小组件
     componentBtnClick = (type) => {
         let item = {
             order: this.state.jieguoArray[this.state.addBtnZhuJianIndex].ziduanResult.length,
             type: type,
             name: ''
         };
+        if (type === 'radio' || type === 'checkbox') {
+            item.radioGroup = ['默认值', '默认值']
+        }
         this.state.jieguoInputResult.item = item;
         this.state.jieguoInputResult.index = this.state.addBtnZhuJianIndex;
         this.setState({
             componentRedactModal: true,
             jieguoInputResult: this.state.jieguoInputResult
         })
+        console.log(this.state.jieguoInputResult);
     }
+    //组件编辑文本框输入内容
     componentContentUpdateInput = (type, e) => {
         if (type === 'name') {
             this.state.jieguoInputResult.item.name = e.target.value
@@ -152,7 +164,56 @@ export default class FlowPathAdd extends React.Component {
         })
         console.log(this.state.jieguoInputResult)
     }
+    //组件编辑单选
+    componentContentUpdateCheckbox = (type, e) => {
+        if (type === 'isFillIn') {
+            this.state.jieguoInputResult.item.isFillIn = e.target.checked
+        }
+        if (type === 'listShow') {
+            this.state.jieguoInputResult.item.listShow = e.target.checked
+        }
+        if (type === 'isHidden') {
+            this.state.jieguoInputResult.item.isHidden = e.target.checked
+        }
+        if (type === 'defaultNewDate') {
+            this.state.jieguoInputResult.item.defaultNewDate = e.target.checked
+        }
+        this.setState({
+            jieguoInputResult: this.state.jieguoInputResult
+        })
+    }
+    componentContentSelectInput = (index, e) => {
+        this.state.jieguoInputResult.item.radioGroup[index] = e.target.value;
+        this.setState({
+            jieguoInputResult: this.state.jieguoInputResult
+        })
+    }
+    componentContentSelectDelect = (index) => {
+        if (this.state.jieguoInputResult.item.radioGroup.length === 1) {
+            message.warn("必须保留一个", 1);
+            return;
+        }
+        this.state.jieguoInputResult.item.radioGroup.splice(index, 1);
+        this.setState({
+            jieguoInputResult: this.state.jieguoInputResult
+        })
 
+    }
+    //删除字段结果
+    deletzhiDuanJieGuo = (index , zhiduanIndex) =>{
+        console.log(index);
+        console.log(this.state.jieguoArray);
+        this.state.jieguoArray[index].ziduanResult.splice(zhiduanIndex, 1);
+        this.setState({
+            jieguoArray:  this.state.jieguoArray
+        })
+    }
+    updateZhiDuanJieGuo = (index , zhiduanIndex) =>{
+        this.setState({
+            componentRedactModal: true,
+            isUpdate: true
+        })
+    }
     render() {
         return (
             <div className="add-body">
@@ -230,6 +291,7 @@ export default class FlowPathAdd extends React.Component {
                     </Col>
                 </Row>
                 <div style={{margin: 10}}>
+                    {/*节点结构*/}
                     {
                         this.state.jieguoArray.map((item, index) => (
                             <Row>
@@ -268,22 +330,95 @@ export default class FlowPathAdd extends React.Component {
                                 </Row>
                                 {/*字段*/}
                                 {
-                                    item.ziduanResult.map((zhiduanItem, index) => (
-                                        <Row type='flex' justify='start' align="middle">
-                                            {zhiduanItem.alias != undefined && zhiduanItem.alias != null && zhiduanItem.alias != '' ?
-                                                <Col span={24}>
-                                                    数据别名：{zhiduanItem.alias}
-                                                </Col> : null
-                                            }
+                                    item.ziduanResult.map((zhiduanItem, zhiduanIndex) => (
+                                        <Row>
                                             <Row type='flex' justify='start' align="middle">
-                                                <Col pull={1} span={6}
-                                                     className="add-text-right">{zhiduanItem.name}：</Col>
-                                                <Col span={18}>
-                                                    <Input disabled={true} type={zhiduanItem.type}
-                                                           defaultValue={zhiduanItem.defaultValue}/>
+                                                <Col offset={5} span={19}>
+                                                <span className="add-margin-right">
+                                                    {zhiduanItem.listShow === undefined || zhiduanItem.listShow === null || zhiduanItem.listShow === '' ||
+                                                    zhiduanItem.listShow === false ?
+                                                        <Icon type="close-circle" theme="twoTone"/> :
+                                                        <Icon type="check-circle" theme="twoTone"/>
+                                                    }
+                                                    列表显示
+                                                </span>
+                                                    <span className="add-margin-right">
+                                                    {zhiduanItem.isFillIn === undefined || zhiduanItem.isFillIn === null || zhiduanItem.isFillIn === '' ||
+                                                    zhiduanItem.isFillIn === false ?
+                                                        <Icon type="close-circle" theme="twoTone"/> :
+                                                        <Icon type="check-circle" theme="twoTone"/>
+                                                    }
+                                                        必填
+                                                </span>
+                                                    <span className="add-margin-right">
+                                                    {zhiduanItem.isHidden === undefined || zhiduanItem.isHidden === null || zhiduanItem.isHidden === '' ||
+                                                    zhiduanItem.isHidden === false ?
+                                                        <Icon type="close-circle" theme="twoTone"/> :
+                                                        <Icon type="check-circle" theme="twoTone"/>
+                                                    }
+                                                        隐藏
+                                                </span>
+                                                    {
+                                                        zhiduanItem.type === 'dateTime' || zhiduanItem.type === 'date' ?
+                                                                <span className="add-margin-right">
+                                                                    {zhiduanItem.defaultNewDate === undefined || zhiduanItem.defaultNewDate === null || zhiduanItem.defaultNewDate === '' ||
+                                                                    zhiduanItem.defaultNewDate === false ?
+                                                                        <Icon type="close-circle" theme="twoTone"/> :
+                                                                        <Icon type="check-circle" theme="twoTone"/>
+                                                                    }
+                                                                    当前时间
+                                                                </span>
+                                                            : null
+                                                    }
+                                                    <span>
+                                                    {zhiduanItem.alias !== undefined && zhiduanItem.alias !== null && zhiduanItem.alias !== '' ?
+                                                        '数据别名：' + zhiduanItem.alias : null
+                                                    }
+                                                </span>
+
                                                 </Col>
                                             </Row>
-                                            {/*<Col span={24} className="colHeight"/>*/}
+                                            {zhiduanItem.type === 'radio' || zhiduanItem.type === 'checkbox' ?
+                                                <Row type='flex' justify='start' align="middle">
+                                                    <Col span={5}
+                                                         className="add-text-right">{zhiduanItem.name}：</Col>
+                                                    <Col span={10}>
+                                                        {
+                                                            zhiduanItem.radioGroup.map((radioGroupItem, index) => ((
+                                                                <span className="add-margin-right">
+                                                                      {radioGroupItem} <Checkbox disabled={true}/>
+                                                                   </span>
+                                                            )))
+                                                        }
+                                                    </Col>
+                                                    <Col span={24} className="colHeight"/>
+                                                    <Col span={24} className="colHeight"/>
+                                                </Row> :
+
+                                                <Row type='flex' justify='start' align="middle">
+                                                    <Col span={5}
+                                                         className="add-text-right">{zhiduanItem.name}：</Col>
+                                                    <Col span={10}>
+                                                        <Input disabled={true} type={zhiduanItem.type}
+                                                               value={zhiduanItem.defaultValue}/>
+                                                    </Col>
+                                                    <Col push={1} span={2}>
+                                                        <Button  onClick={this.deletzhiDuanJieGuo.bind(this,index,zhiduanIndex)}>
+                                                            删除
+                                                        </Button>
+
+                                                    </Col>
+                                                    <Col push={1} span={2}>
+                                                        <Button onClick={this.updateZhiDuanJieGuo.bind(this,index,zhiduanIndex)}>
+                                                            更新
+                                                        </Button>
+
+                                                    </Col>
+                                                    <Col span={24} className="colHeight"/>
+                                                    <Col span={24} className="colHeight"/>
+                                                </Row>
+                                            }
+
                                         </Row>
                                     ))
                                 }
@@ -298,6 +433,8 @@ export default class FlowPathAdd extends React.Component {
                             </Row>
                         ))
                     }
+
+                    {/*添加节点*/}
                     <Row type='flex' justify='start' align="middle">
                         <Col span={1} className='add-text-align'>
                             <Icon style={{fontSize: 24, color: 'rgb(2, 136, 209)'}} type="plus-circle" theme="filled"/>
@@ -345,7 +482,11 @@ export default class FlowPathAdd extends React.Component {
                     title="编辑信息"
                     onOk={() => {
                         let data = Object.assign({}, this.state.jieguoInputResult.item, {...this.state.jieguoInputResult.item});
-                        this.state.jieguoArray[this.state.jieguoInputResult.index].ziduanResult.push(data);
+                        if(this.state.isUpdate){
+                            this.state.jieguoArray[this.state.jieguoInputResult.index].ziduanResult[data.order]=data;
+                        }else{
+                            this.state.jieguoArray[this.state.jieguoInputResult.index].ziduanResult.push(data);
+                        }
                         this.setState({
                             jieguoArray: this.state.jieguoArray,
                             componentRedactModal: false
@@ -355,57 +496,154 @@ export default class FlowPathAdd extends React.Component {
                     }}
                     visible={this.state.componentRedactModal}
                     onCancel={() => {
-                        this.state.jieguoInputResult.item = {};
-                        this.setState({
-                            componentRedactModal: false,
-                            jieguoInputResult: this.state.jieguoInputResult
-                        });
+                        if (this.state.isUpdate !== true) {
+                            this.state.jieguoInputResult.item = {};
+                            this.setState({
+                                componentRedactModal: false,
+                                jieguoInputResult: this.state.jieguoInputResult,
+                                isUpdate: false
+                            });
+                        }else{
+                            console.log(this.state.jieguoArray[this.state.jieguoInputResult.index].ziduanResult[this.state.jieguoInputResult.item.order]);
+                            let data = Object.assign({}, this.state.jieguoArray[this.state.jieguoInputResult.index].ziduanResult[this.state.jieguoInputResult.item.order], {...this.state.jieguoArray[this.state.jieguoInputResult.index].ziduanResult[this.state.jieguoInputResult.item.order]});
+                            this.state.jieguoInputResult.item =data;
+                            this.setState({
+                                componentRedactModal: false,
+                                jieguoInputResult:  this.state.jieguoInputResult,
+                                isUpdate: false
+                            });
+                        }
+
                     }}
                 >
                     <Row type="flex" justify="space-between" align="middle">
-                        <Col pull={1} span={6} className="add-text-right">名字：</Col>
-                        <Col span={18}>
+                        <Col pull={1} span={7} className="add-text-right">名字：</Col>
+                        <Col span={17}>
                             <Input value={this.state.jieguoInputResult.item.name}
                                    onChange={this.componentContentUpdateInput.bind(this, 'name')}/>
                         </Col>
                         <Col span={24} className="colHeight"/>
-                        <Col pull={1} span={6} className="add-text-right">描述：</Col>
-                        <Col span={18}>
+                    </Row>
+                    <Row type="flex" justify="space-between" align="middle">
+                        <Col pull={1} span={7} className="add-text-right">描述：</Col>
+                        <Col span={17}>
                             <Input.TextArea value={this.state.jieguoInputResult.item.detail}
                                             onChange={this.componentContentUpdateInput.bind(this, 'detail')}/>
                         </Col>
                         <Col span={24} className="colHeight"/>
-                        <Col pull={1} span={6} className="add-text-right">数据别名：</Col>
-                        <Col span={18}>
+                    </Row>
+                    <Row type="flex" justify="space-between" align="middle">
+                        <Col pull={1} span={7} className="add-text-right">数据别名：</Col>
+                        <Col span={17}>
                             <Input value={this.state.jieguoInputResult.item.alias}
                                    onChange={this.componentContentUpdateInput.bind(this, 'alias')}/>
                         </Col>
                         <Col span={24} className="colHeight"/>
-                        <Col pull={1} span={6} className="add-text-right">默认值：</Col>
-                        <Col span={18}>
-                            <Input value={this.state.jieguoInputResult.item.defaultValue}
-                                   type={this.state.jieguoInputResult.item.type}
-                                   onChange={this.componentContentUpdateInput.bind(this, 'defaultValue')}/>
-                        </Col>
-                        <Col span={24} className="colHeight"/>
-                        <Col pull={1} span={6} className="add-text-right">是否必填：</Col>
-                        <Col span={18}>
-                            <Checkbox/>
-                        </Col>
-                        <Col span={24} className="colHeight"/>
-                        <Col pull={1} span={6} className="add-text-right">列表显示：</Col>
-                        <Col span={18}>
-                            <Checkbox/>
-                        </Col>
-                        <Col span={24} className="colHeight"/>
-                        <Col pull={1} span={6} className="add-text-right">是否允许隐藏：</Col>
-                        <Col span={18}>
-                            <Checkbox/>
-                        </Col>
-
                     </Row>
+                    {this.state.jieguoInputResult.item.type === 'radio' || this.state.jieguoInputResult.item.type === 'checkbox' ?
+                        <Row type="flex" justify="space-between" align="middle">
+                            <Col pull={1} span={7} className="add-text-right">
+                                选项：
+                            </Col>
+                            <Col span={17}>
+                                {this.state.jieguoInputResult.item.radioGroup.map((radioGroupItem, index) => (
+                                    <Row type="flex" className="marginBottom">
+                                        <Col span={18}>
+                                            <Input value={radioGroupItem}
+                                                   onChange={this.componentContentSelectInput.bind(this, index)}/>
+                                        </Col>
+                                        <Col push={1} span={2}>
+                                            <Button onClick={this.componentContentSelectDelect.bind(this, index)}>
+                                                删除
+                                            </Button>
+                                        </Col>
+                                    </Row>
 
+                                ))}
+                            </Col>
+                            <Col push={6} span={24}>
+                                <Button onClick={() => {
+                                    this.state.jieguoInputResult.item.radioGroup.push("默认值");
+                                    this.setState({
+                                        jieguoInputResult: this.state.jieguoInputResult
+                                    })
+                                }}>
+                                    添加选项
+                                </Button>
 
+                            </Col>
+                            <Col span={24} className="colHeight"/>
+                        </Row>
+                        : this.state.jieguoInputResult.item.type === 'dateTime' || this.state.jieguoInputResult.item.type === 'date' ?
+                            //时间控件
+                            (
+                                <Row type="flex" justify="space-between" align="middle">
+                                    <Col pull={1} span={7} className="add-text-right">默认值：</Col>
+                                    <Col span={17}>
+                                        <DatePicker
+                                            value={jsUtil.isEmpty(this.state.jieguoInputResult.item.defaultValue) ? null : moment(this.state.jieguoInputResult.item.defaultValue, this.state.jieguoInputResult.item.type === 'dateTime' ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD')}
+                                            showTime={this.state.jieguoInputResult.item.type === 'dateTime'}
+                                            format={this.state.jieguoInputResult.item.type === 'dateTime' ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD'}
+                                            showTime={this.state.jieguoInputResult.item.type === 'dateTime'}
+                                            onChange={(date, dateString) => {
+                                                this.state.jieguoInputResult.item.defaultValue = dateString;
+                                                this.setState({
+                                                    jieguoInputResult: this.state.jieguoInputResult
+                                                })
+                                            }}/>
+                                    </Col>
+                                    <Col span={24} className="colHeight"/>
+                                </Row>
+                            )
+                            :
+                            (
+                                <Row type="flex" justify="space-between" align="middle">
+                                    <Col pull={1} span={7} className="add-text-right">默认值：</Col>
+                                    <Col span={17}>
+                                        <Input value={this.state.jieguoInputResult.item.defaultValue}
+                                               type={this.state.jieguoInputResult.item.type}
+                                               onChange={this.componentContentUpdateInput.bind(this, 'defaultValue')}/>
+                                    </Col>
+                                    <Col span={24} className="colHeight"/>
+                                </Row>
+                            )
+
+                    }
+
+                    <Row type="flex" justify="space-between" align="middle">
+                        <Col pull={1} span={7} className="add-text-right">是否必填：</Col>
+                        <Col span={17}>
+                            <Checkbox checked={this.state.jieguoInputResult.item.isFillIn}
+                                      onChange={this.componentContentUpdateCheckbox.bind(this, 'isFillIn')}/>
+                        </Col>
+                        <Col span={24} className="colHeight"/>
+                    </Row>
+                    <Row type="flex" justify="space-between" align="middle">
+                        <Col pull={1} span={7} className="add-text-right">列表显示：</Col>
+                        <Col span={17}>
+                            <Checkbox checked={this.state.jieguoInputResult.item.listShow}
+                                      onChange={this.componentContentUpdateCheckbox.bind(this, 'listShow')}/>
+                        </Col>
+                        <Col span={24} className="colHeight"/>
+                    </Row>
+                    <Row type="flex" justify="space-between" align="middle">
+                        <Col pull={1} span={7} className="add-text-right">是否允许隐藏：</Col>
+                        <Col span={17}>
+                            <Checkbox checked={this.state.jieguoInputResult.item.isHidden}
+                                      onChange={this.componentContentUpdateCheckbox.bind(this, 'isHidden')}/>
+                        </Col>
+                        <Col span={24} className="colHeight"/>
+                    </Row>
+                    {
+                        this.state.jieguoInputResult.item.type === 'dateTime' || this.state.jieguoInputResult.item.type === 'date' ?
+                            <Row type="flex" justify="space-between" align="middle">
+                                <Col pull={1} span={7} className="add-text-right">是否默认当前时间：</Col>
+                                <Col span={17}>
+                                    <Checkbox checked={this.state.jieguoInputResult.item.defaultNewDate}
+                                              onChange={this.componentContentUpdateCheckbox.bind(this, 'defaultNewDate')}/>
+                                </Col>
+                            </Row> : null
+                    }
                 </Modal>
 
 
